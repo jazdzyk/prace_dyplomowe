@@ -1,6 +1,7 @@
-from view import BaseModifyView
+from view import AddResearcherView
+from protocols import AddModifyViewDelegate
 
 
-class ModifyResearcherView(BaseModifyView):
-    def __init__(self, parent):
-        BaseModifyView.__init__(self, parent)
+class ModifyResearcherView(AddResearcherView):
+    def __init__(self, parent, delegate: AddModifyViewDelegate = None):
+        AddResearcherView.__init__(self, parent, delegate=delegate)

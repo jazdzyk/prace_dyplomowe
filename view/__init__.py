@@ -3,8 +3,6 @@ __all__ = [
     "SearchDataView",
     "DisplayDataView",
     "BaseAddModifyView",
-    "BaseAddView",
-    "BaseModifyView",
     "ManageThesesView",
     "GenerateReportView",
     "AddDefenseView",
@@ -22,11 +20,9 @@ from view.base_view import BaseView
 from view.search_data_view import SearchDataView
 from view.display_data_view import DisplayDataView
 from view.base_add_modify_view import BaseAddModifyView
-from view.base_add_view import BaseAddView
-from view.base_modify_view import BaseModifyView
 from view.manage_theses_view import ManageThesesView
 from view.generate_report_view import GenerateReportView
-from view.add_defence_view import AddDefenseView
+from view.add_defense_view import AddDefenseView
 from view.add_researcher_view import AddResearcherView
 from view.add_thesis_view import AddThesisView
 from view.add_review_view import AddReviewView
