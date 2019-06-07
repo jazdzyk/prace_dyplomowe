@@ -1,4 +1,4 @@
-from view import SearchDataView, DisplayDataView, AddDefenseView, AddReviewView, AddThesisView, AddResearcherView, AddStudentView
+from view import SearchDataView, DisplayDataView, ModifyThesisView
 from protocols import SearchDataViewDelegate, AddModifyViewDelegate
 from PyQt5.Qt import QMainWindow, QWidget
 
@@ -12,7 +12,7 @@ class TestController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
         QMainWindow.__init__(self, parent)
         wid = QWidget(self)
         self.setCentralWidget(wid)
-        test_view = AddStudentView(wid, delegate=self)
+        test_view = ModifyThesisView(wid, delegate=self)
         wid.setLayout(test_view)
         self.showMaximized()
 

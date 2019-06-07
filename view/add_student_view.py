@@ -5,8 +5,8 @@ from view import BaseAddModifyView
 
 
 class AddStudentView(BaseAddModifyView):
-    def __init__(self, parent, delegate: AddModifyViewDelegate = None):
-        BaseAddModifyView.__init__(self, parent, title_prefix="Dodawanie", title_suffix="Studenta")
+    def __init__(self, parent, delegate: AddModifyViewDelegate = None, title_prefix="Dodawanie"):
+        BaseAddModifyView.__init__(self, parent, title_prefix=title_prefix, title_suffix="Studenta")
         self._delegate = delegate
         self._set_up_general()
         self._set_up_ui()
@@ -22,6 +22,10 @@ class AddStudentView(BaseAddModifyView):
         ]
 
     def _set_up_ui(self):
+        if self._title_prefix == "Dodawanie":
+            delegate_function = self._delegate.view_did_press_add_button
+        else:
+            delegate_function = self._delegate.view_did_press_modify_button
         self._create_layout(fields=self._fields,
-                            delegate_function=self._delegate.view_did_press_add_button)
+                            delegate_function=delegate_function)
         self._add_callbacks()

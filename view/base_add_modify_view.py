@@ -16,6 +16,8 @@ class BaseAddModifyView(BaseView):
         self._title = f"{self._title_prefix} {self._title_suffix}"
         self._editable_fields = {}
         self._data = {}
+        self._combo_box_items = {}
+        self._list_view_items = {}
 
     def _create_layout(self, fields, delegate_function):
         for title, qclass in fields:
@@ -70,18 +72,14 @@ class BaseAddModifyView(BaseView):
 
         return _callback
 
-    def _add_callbacks(self, **kwargs):
-        combo_box_items = kwargs.get("combo_box_items")
-        combo_box_count = 0
-
-        list_view_items = kwargs.get("list_view_items")
-        list_view_count = 0
+    def _add_callbacks(self):
+        combo_box_count, list_view_count = 0, 0
 
         for key, field in self._editable_fields.items():
             if isinstance(field, QLineEdit):
                 field.editingFinished.connect(self._on_line_edit_editing_finished(key, field))
             elif isinstance(field, QComboBox):
-                for index, text in enumerate(combo_box_items[combo_box_count]):
+                for index, text in enumerate(self._combo_box_items[combo_box_count]):
                     field.insertItem(index, text)
                 field.currentTextChanged.connect(self._on_combo_box_current_text_changed(key))
                 combo_box_count += 1
@@ -96,11 +94,54 @@ class BaseAddModifyView(BaseView):
                 model = QStandardItemModel()
                 field.setModel(model)
                 field.setSelectionMode(QAbstractItemView.MultiSelection)
-                for text in list_view_items[list_view_count]:
+                for text in self._list_view_items[list_view_count]:
                     model.appendRow(QStandardItem(text))
                 field.clicked.connect(self._on_list_view_clicked(key, model))
                 list_view_count += 1
                 self._data[key] = []
+
+    def _set_up_initial_values(self, **kwargs):
+        line_edit_values = kwargs.get("line_edit_values")
+        line_edit_count = 0
+
+        combo_box_values = kwargs.get("combo_box_values")
+        combo_box_count = 0
+
+        date_edit_values = kwargs.get("date_edit_values")
+        date_edit_count = 0
+
+        text_edit_values = kwargs.get("text_edit_values")
+        text_edit_count = 0
+
+        list_view_values = kwargs.get("list_view_values")
+        list_view_count = 0
+
+        for key, field in self._editable_fields.items():
+            if isinstance(field, QLineEdit):
+                field.setText(line_edit_values[line_edit_count])
+                self._data[key] = line_edit_values[line_edit_count]
+                line_edit_count += 1
+            elif isinstance(field, QComboBox):
+                field.setCurrentText(combo_box_values[combo_box_count])
+                self._data[key] = combo_box_values[combo_box_count]
+                combo_box_count += 1
+            elif isinstance(field, QDateEdit):
+                field.setDate(date_edit_values[date_edit_count])
+                self._data[key] = self.__format_date_string(date_edit_values[date_edit_count])
+                date_edit_count += 1
+            elif isinstance(field, QTextEdit):
+                field.setText(text_edit_values[text_edit_count])
+                self._data[key] = text_edit_values[text_edit_count]
+                text_edit_count += 1
+            elif isinstance(field, QListView):
+                model = field.model()
+                for value in list_view_values[list_view_count]:
+                    for index in range(model.rowCount()):
+                        item = model.item(index)
+                        if item.text() == value:
+                            field.setCurrentIndex(model.index(index, 0))
+                self._data[key] = list_view_values[list_view_count]
+                list_view_count += 1
 
     def __create_horizontal_layout(self, title, QClass):
         label = QLabel(title)
@@ -119,4 +160,4 @@ class BaseAddModifyView(BaseView):
 
     @staticmethod
     def __format_date_string(date):
-        return f"{date.day()}/{date.month()}/{date.year()}"
+        return f"{date.day()}-{date.month()}-{date.year()}"
