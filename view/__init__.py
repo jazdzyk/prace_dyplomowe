@@ -14,6 +14,7 @@ __all__ = [
     "ModifyResearcherView",
     "ModifyStudentView",
     "ModifyThesisView",
+    "OptionsMenuView",
 ]
 
 from view.base_view import BaseView
@@ -31,3 +32,4 @@ from view.modify_defense_view import ModifyDefenseView
 from view.modify_researcher_view import ModifyResearcherView
 from view.modify_student_view import ModifyStudentView
 from view.modify_thesis_view import ModifyThesisView
+from view.options_menu_view import OptionsMenuView

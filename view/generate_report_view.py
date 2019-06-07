@@ -1,7 +1,7 @@
 import math
 
 from PyQt5.QtCore import QDate
-from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QTableView, QLabel, QLineEdit, QComboBox, QDateEdit
+from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QTableView, QLabel, QComboBox, QDateEdit
 
 from protocols import GenerateReportViewDelegate
 from view import BaseView
