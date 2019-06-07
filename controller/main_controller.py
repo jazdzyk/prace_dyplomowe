@@ -1,19 +1,20 @@
-from view import SearchDataView, DisplayDataView, ManageThesesView
-from protocols import SearchDataViewDelegate, AddModifyViewDelegate, ManageThesesViewDelegate
+from view import SearchDataView, DisplayDataView, ManageThesesView, GenerateReportView
+from protocols import SearchDataViewDelegate, AddModifyViewDelegate, ManageThesesViewDelegate, \
+    GenerateReportViewDelegate
 from PyQt5.Qt import QMainWindow, QWidget
 
 
-class TestControllerMeta(type(QMainWindow), type(SearchDataViewDelegate)):
+class MainControllerMeta(type(QMainWindow), type(SearchDataViewDelegate)):
     pass
 
 
-class TestController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate, ManageThesesViewDelegate,
-                     metaclass=TestControllerMeta):
+class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate, ManageThesesViewDelegate, GenerateReportViewDelegate,
+                     metaclass=MainControllerMeta):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         wid = QWidget(self)
         self.setCentralWidget(wid)
-        test_view = ManageThesesView(wid, delegate=self)
+        test_view = GenerateReportView(wid, delegate=self)
         wid.setLayout(test_view)
         self.showMaximized()
 
@@ -49,3 +50,13 @@ class TestController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
 
     def view_did_select_adding_review(self, view, data):
         print(f"view_did_select_adding_review: {data}")
+
+    def view_did_select_theses_assigned_to_researcher(self, view):
+        print(f"view_did_select_theses_assigned_to_researcher: ")
+
+    def view_did_select_theses_between_dates(self, view):
+        print(f"view_did_select_theses_between_dates: ")
+
+    def view_did_select_theses_on_career(self, view):
+        print(f"view_did_select_theses_on_career: ")
+
