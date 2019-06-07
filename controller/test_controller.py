@@ -1,5 +1,5 @@
-from view import SearchDataView, DisplayDataView, ModifyThesisView
-from protocols import SearchDataViewDelegate, AddModifyViewDelegate
+from view import SearchDataView, DisplayDataView, ManageThesesView
+from protocols import SearchDataViewDelegate, AddModifyViewDelegate, ManageThesesViewDelegate
 from PyQt5.Qt import QMainWindow, QWidget
 
 
@@ -7,12 +7,13 @@ class TestControllerMeta(type(QMainWindow), type(SearchDataViewDelegate)):
     pass
 
 
-class TestController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate, metaclass=TestControllerMeta):
+class TestController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate, ManageThesesViewDelegate,
+                     metaclass=TestControllerMeta):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         wid = QWidget(self)
         self.setCentralWidget(wid)
-        test_view = ModifyThesisView(wid, delegate=self)
+        test_view = ManageThesesView(wid, delegate=self)
         wid.setLayout(test_view)
         self.showMaximized()
 
@@ -37,4 +38,14 @@ class TestController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
     def view_did_press_modify_button(self, view, data):
         print(f"view_did_press_modify_button: {data}")
 
+    def view_did_choose_to_manage_undefended_theses(self, view):
+        print(f"view_did_choose_to_manage_undefended_theses: ")
 
+    def view_did_choose_to_manage_defended_theses(self, view):
+        print(f"view_did_choose_to_manage_defended_theses: ")
+
+    def view_did_select_displaying_data(self, view, data):
+        print(f"view_did_select_displaying_data: {data}")
+
+    def view_did_select_adding_review(self, view, data):
+        print(f"view_did_select_adding_review: {data}")
