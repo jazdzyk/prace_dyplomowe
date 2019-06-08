@@ -76,8 +76,9 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
         self._horizontal_layout = horizontal_layout
 
     def _set_up_action_view(self, view):
-        self._action_stacked_layout.addItem(view)
-        self._action_stacked_layout.setCurrentIndex()
+        self._action_stacked_layout.takeAt(0)
+        self._action_stacked_layout.addWidget(view)
+        self._action_stacked_layout.setCurrentIndex(0)
 
     def view_did_press_search_button(self, view, search_query_text):
         print(f"view_did_press_search_button: {search_query_text}")
@@ -136,4 +137,4 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
             Options.MODIFY_STUDENT_VIEW: ModifyStudentView,
             Options.MODIFY_THESIS_VIEW: ModifyThesisView,
             Options.SEARCH_DATA: SearchDataView,
-        }.get(option)(self.centralWidget(), delegate=self), index=option.id)
+        }.get(option)(self.centralWidget(), delegate=self))

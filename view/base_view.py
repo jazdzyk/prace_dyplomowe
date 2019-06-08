@@ -1,10 +1,12 @@
-from PyQt5.QtWidgets import QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget
 from PyQt5.QtGui import QColor, QFont
 
 
-class BaseView(QVBoxLayout):
+class BaseView(QWidget):
     def __init__(self, parent=None):
-        QVBoxLayout.__init__(self, parent)
+        QWidget.__init__(self, parent)
+        self._layout = QVBoxLayout()
+        self.setLayout(self._layout)
         self._set_up_default_header_bar()
 
     @property
@@ -47,7 +49,7 @@ class BaseView(QVBoxLayout):
         self.__update_header_bar_stylesheet()
         self.__update_header_bar_font(size=36)
 
-        self.addWidget(self.__header_label)
+        self._layout.addWidget(self.__header_label)
 
     def _add_widgets(self, widgets):
         self._add_widgets_to_layout(widgets, self)

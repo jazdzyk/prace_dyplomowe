@@ -20,23 +20,23 @@ class GenerateReportView(BaseView):
     def _set_up_ui(self):
         top_layout, researcher_combo_box = self.__create_horizontal_layout("Pracownik naukowy", [QComboBox])
         self._researcher_combo_box = researcher_combo_box[0]
-        self.addLayout(top_layout)
+        self._layout.addLayout(top_layout)
 
         mid_layout, dates_edits = self.__create_horizontal_layout("Data obrony", [QDateEdit, QDateEdit])
         self._start_date, self._end_date = dates_edits
-        self.addLayout(mid_layout)
+        self._layout.addLayout(mid_layout)
 
         bottom_layout, career_combo_box = self.__create_horizontal_layout("Kierunek", [QComboBox])
         self._career_combo_box = career_combo_box[0]
-        self.addLayout(bottom_layout)
+        self._layout.addLayout(bottom_layout)
 
         self._start_date.setDate(QDate.currentDate())
         self._end_date.setDate(QDate.currentDate())
 
-        self.addLayout(self.__create_top_buttons())
+        self._layout.addLayout(self.__create_top_buttons())
         table_view = QTableView()
-        self.addWidget(table_view)
-        self.addStretch(1)
+        self._layout.addWidget(table_view)
+        self._layout.addStretch(1)
 
     def __create_top_buttons(self):
         def on_button1_clicked():

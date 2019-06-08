@@ -28,8 +28,8 @@ class DisplayDataView(BaseView):
 
         for _data in data:
             title, line = _data
-            self.addLayout(self.__create_horizontal_layout(title, line))
-        self.addStretch(1)
+            self._layout.addLayout(self.__create_horizontal_layout(title, line))
+        self._layout.addStretch(1)
 
     def __create_horizontal_layout(self, title, line):
         label = QLabel(title)

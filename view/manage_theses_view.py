@@ -18,10 +18,10 @@ class ManageThesesView(BaseView):
     def _set_up_ui(self):
         table_view = QTableView()
 
-        self.addLayout(self.__create_top_buttons())
-        self.addWidget(table_view)
-        self.addLayout(self.__create_bottom_buttons())
-        self.addStretch(1)
+        self._layout.addLayout(self.__create_top_buttons())
+        self._layout.addWidget(table_view)
+        self._layout.addLayout(self.__create_bottom_buttons())
+        self._layout.addStretch(1)
 
     def __create_top_buttons(self):
         def on_left_button_clicked():

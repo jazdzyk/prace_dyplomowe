@@ -51,7 +51,7 @@ class SearchDataView(BaseView):
 
         group_box = QGroupBox("Zakres")
         group_box.setLayout(layout)
-        self.addWidget(group_box)
+        self._layout.addWidget(group_box)
 
     def __set_up_search_keyword_box(self):
         line_edit = QLineEdit()
@@ -77,7 +77,7 @@ class SearchDataView(BaseView):
 
         group_box = QGroupBox("Hasło wyszukiwania")
         group_box.setLayout(layout)
-        self.addWidget(group_box)
+        self._layout.addWidget(group_box)
 
     def __set_up_results_box(self):
         table_view = QTableView()
@@ -88,7 +88,7 @@ class SearchDataView(BaseView):
 
         group_box = QGroupBox("Wyniki wyszukiwania")
         group_box.setLayout(layout)
-        self.addWidget(group_box)
+        self._layout.addWidget(group_box)
 
     def __create_results_buttons(self):
         def on_left_button_clicked():

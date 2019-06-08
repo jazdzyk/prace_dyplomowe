@@ -21,7 +21,7 @@ class BaseAddModifyView(BaseView):
 
     def _create_layout(self, fields, delegate_function):
         for title, qclass in fields:
-            self.addLayout(self.__create_horizontal_layout(title, qclass))
+            self._layout.addLayout(self.__create_horizontal_layout(title, qclass))
 
         def on_button_clicked():
             delegate_function(self, self._data)
@@ -32,8 +32,8 @@ class BaseAddModifyView(BaseView):
         button_layout.addStretch(1)
         button_layout.addWidget(button)
         button_layout.addStretch(1)
-        self.addLayout(button_layout)
-        self.addStretch(1)
+        self._layout.addLayout(button_layout)
+        self._layout.addStretch(1)
 
     def _on_line_edit_editing_finished(self, key, field):
         def _callback():
