@@ -11,4 +11,4 @@ class Faculty(Base):
     nazwaWydzialu = Column(VARCHAR("max"), nullable=False)
 
     def __repr__(self):
-        return f"<Wydzial(id_Wydzial={self.id_Wydzial}, nazwaWydzialu={self.nazwaWydzialu})>"
+        return f"<{self.__tablename__}(id_Wydzial={self.id_Wydzial}, nazwaWydzialu={self.nazwaWydzialu})>"

@@ -1,7 +1,7 @@
+from sqlalchemy import Column, SMALLINT, NUMERIC, VARCHAR
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
-from sqlalchemy import Column, SMALLINT, NUMERIC, VARCHAR
 
 
 class ThesesAuthors(Base):

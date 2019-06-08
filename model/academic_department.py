@@ -12,5 +12,5 @@ class AcademicDepartment(Base):
     id_Wydzial = Column(SMALLINT, nullable=False)
 
     def __repr__(self):
-        return f"<Katedra(id_Katedra={self.id_Wydzial}, " \
-            f"nazwaKatedry={self.nazwaWydzialu}, id_Wydzial={self.id_Wydzial})>"
+        return f"<{self.__tablename__}(id_Katedra={self.id_Wydzial}, nazwaKatedry={self.nazwaWydzialu}, " \
+            f"id_Wydzial={self.id_Wydzial})>"
