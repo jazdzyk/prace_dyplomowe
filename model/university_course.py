@@ -5,7 +5,7 @@ Base = declarative_base()
 
 
 class UniversityCourse(Base):
-    __tablename__ = "PraceDyplomowe"
+    __tablename__ = "KierunekStudiow"
 
     id_kierunek = Column(SMALLINT, primary_key=True)
     nazwaKierunku = Column(VARCHAR("max"), nullable=False)

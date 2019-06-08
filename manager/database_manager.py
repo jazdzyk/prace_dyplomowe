@@ -31,6 +31,10 @@ class DatabaseManager:
         self._session.add(data)
         self._session.commit()
 
+    def add_many(self, data):
+        self._session.add_all(data)
+        self._session.commit()
+
     @staticmethod
     def __start_session():
         engine = create_engine(
