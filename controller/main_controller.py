@@ -1,8 +1,8 @@
 from PyQt5.Qt import QMainWindow, QWidget
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QStackedLayout, QFrame
+from PyQt5.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QStackedLayout
 
+from manager import DatabaseManager
 from protocols import SearchDataViewDelegate, AddModifyViewDelegate, ManageThesesViewDelegate, \
     GenerateReportViewDelegate, OptionsMenuViewDelegate
 from view import AddDefenseView, OptionsMenuView, AddResearcherView, AddReviewView, AddStudentView, AddThesisView, \
@@ -27,22 +27,25 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
         self.setCentralWidget(QWidget(self))
         self._set_up_ui()
         self.showMaximized()
+        self._db_manager = DatabaseManager.instance()
 
     def _set_up_ui(self):
         self._main_layout = QVBoxLayout()
         self.centralWidget().setLayout(self._main_layout)
         self._set_up_top_label()
+        self._horizontal_layout = QHBoxLayout()
+        self._main_layout.addLayout(self._horizontal_layout)
         self._set_up_menu_view()
+        self._set_up_stacked_view()
 
-        self._action_stacked_layout = QStackedLayout(self._horizontal_layout)
-        self._horizontal_layout.addLayout(self._action_stacked_layout)
-        empty_label = QLabel()
-        empty_label.setFrameShape(QFrame.Panel)
-        empty_label.setFrameShadow(QFrame.Sunken)
-        empty_label.setLineWidth(3)
-        self._action_stacked_layout.addWidget(empty_label)
+    def _set_up_stacked_view(self):
+        self._action_stacked_layout = QStackedLayout()
+        horizontal_layout = QHBoxLayout()
+        horizontal_layout.addLayout(self._action_stacked_layout, 4)
+        self._action_stacked_layout.addWidget(QLabel())
         self._action_stacked_layout.setCurrentIndex(0)
-        self._horizontal_layout.addStretch(1)
+        horizontal_layout.addStretch(1)
+        self._horizontal_layout.addLayout(horizontal_layout, 7)
 
     def _set_up_top_label(self):
         top_label = QLabel(f"Zalogowany jako {self._user}")
@@ -58,7 +61,6 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
 
     def _set_up_menu_view(self):
         horizontal_layout = QHBoxLayout()
-        self.centralWidget().setLayout(horizontal_layout)
         horizontal_layout.addStretch(1)
         horizontal_layout.addLayout(OptionsMenuView(options=(
             Options.ADD_STUDENT_VIEW,
@@ -71,15 +73,15 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
             Options.MODIFY_DEFENSE_VIEW,
             Options.SEARCH_DATA,
             Options.GENERATE_REPORT
-        ), parent=self.centralWidget(), delegate=self), 1)
-        self._main_layout.addLayout(horizontal_layout)
-        self._horizontal_layout = horizontal_layout
+        ), delegate=self))
+        self._horizontal_layout.addLayout(horizontal_layout, 1)
 
     def _set_up_action_view(self, view):
         self._action_stacked_layout.takeAt(0)
         self._action_stacked_layout.addWidget(view)
         self._action_stacked_layout.setCurrentIndex(0)
 
+    # SearchDataViewDelegate methods
     def view_did_press_search_button(self, view, search_query_text):
         print(f"view_did_press_search_button: {search_query_text}")
 
@@ -95,12 +97,14 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
     def view_did_choose_to_display_theses(self, view):
         print(f"view_did_choose_to_display_theses: ")
 
+    # AddModifyViewDelegate methods
     def view_did_press_add_button(self, view, data):
         print(f"view_did_press_add_button: {data}")
 
     def view_did_press_modify_button(self, view, data):
         print(f"view_did_press_modify_button: {data}")
 
+    # ManageThesesViewDelegate methods
     def view_did_choose_to_manage_undefended_theses(self, view):
         print(f"view_did_choose_to_manage_undefended_theses: ")
 
@@ -113,6 +117,7 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
     def view_did_select_adding_review(self, view, data):
         print(f"view_did_select_adding_review: {data}")
 
+    # GenerateReportViewDelegate methods
     def view_did_select_theses_assigned_to_researcher(self, view):
         print(f"view_did_select_theses_assigned_to_researcher: ")
 
@@ -122,6 +127,7 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
     def view_did_select_theses_on_career(self, view):
         print(f"view_did_select_theses_on_career: ")
 
+    # OptionsMenuViewDelegate methods
     def view_did_select_option(self, view, option):
         print(f"view_did_select_option: {option}")
         self._set_up_action_view(view={
