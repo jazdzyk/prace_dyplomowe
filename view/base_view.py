@@ -1,10 +1,13 @@
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget
 from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget
+
+from manager import DatabaseManager
 
 
 class BaseView(QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
+        self._db_manager = DatabaseManager.instance()
         self._layout = QVBoxLayout()
         self.setLayout(self._layout)
         self._set_up_default_header_bar()
@@ -66,6 +69,10 @@ class BaseView(QWidget):
     def _add_layouts_to_layout(layouts, parent_layout):
         for layout in layouts:
             parent_layout.addLayout(layout)
+
+    @staticmethod
+    def _format_date_string(date):
+        return f"{date.year()}{date.month():02d}{date.day():02d} 08:00:00 AM"
 
     def __update_header_bar_stylesheet(self, **kwargs):
         color: QColor = kwargs.get("color", self._header_color)

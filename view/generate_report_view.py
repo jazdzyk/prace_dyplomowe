@@ -1,8 +1,10 @@
 import math
 
 from PyQt5.QtCore import QDate
-from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QTableView, QLabel, QComboBox, QDateEdit
+from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QTableView, QLabel, QComboBox, QDateEdit, QHeaderView, \
+    QAbstractItemView
 
+from model.table import ReportTableModel
 from protocols import GenerateReportViewDelegate
 from view import BaseView
 
@@ -14,12 +16,22 @@ class GenerateReportView(BaseView):
         self._set_up_general()
         self._set_up_ui()
 
+    def set_table_view(self, data):
+
+        model = ReportTableModel(data)
+        self._table_view.setModel(model)
+        self._table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self._table_view.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self._table_view.show()
+
     def _set_up_general(self):
         self._title = "Generuj raport"
 
     def _set_up_ui(self):
         top_layout, researcher_combo_box = self.__create_horizontal_layout("Pracownik naukowy", [QComboBox])
         self._researcher_combo_box = researcher_combo_box[0]
+        for index, researcher in enumerate(self._researchers):
+            self._researcher_combo_box.insertItem(index, researcher)
         self._layout.addLayout(top_layout)
 
         mid_layout, dates_edits = self.__create_horizontal_layout("Data obrony", [QDateEdit, QDateEdit])
@@ -28,25 +40,30 @@ class GenerateReportView(BaseView):
 
         bottom_layout, career_combo_box = self.__create_horizontal_layout("Kierunek", [QComboBox])
         self._career_combo_box = career_combo_box[0]
+        for index, career in enumerate(self._careers):
+            self._career_combo_box.insertItem(index, career)
         self._layout.addLayout(bottom_layout)
 
         self._start_date.setDate(QDate.currentDate())
         self._end_date.setDate(QDate.currentDate())
 
         self._layout.addLayout(self.__create_top_buttons())
-        table_view = QTableView()
-        self._layout.addWidget(table_view)
+        self._table_view = QTableView()
+        self._layout.addWidget(self._table_view)
         self._layout.addStretch(1)
 
     def __create_top_buttons(self):
         def on_button1_clicked():
-            self._delegate.view_did_select_theses_assigned_to_researcher(self)
+            self._delegate.view_did_select_theses_assigned_to_researcher(self, self._researcher_combo_box.currentText())
 
         def on_button2_clicked():
-            self._delegate.view_did_select_theses_between_dates(self)
+            self._delegate.view_did_select_theses_between_dates(self,
+                                                                self._format_date_string(self._start_date.date()),
+                                                                self._format_date_string(self._end_date.date()))
 
         def on_button3_clicked():
-            self._delegate.view_did_select_theses_on_career(self)
+            self._delegate.view_did_select_theses_on_career(self, self._career_combo_box.currentText()
+                                                            .split("-")[0].rstrip())
 
         button1 = QPushButton("Prace przypisane do pracownika naukowego")
         button1.clicked.connect(on_button1_clicked)
@@ -77,3 +94,19 @@ class GenerateReportView(BaseView):
             layout.addWidget(editable, int(math.ceil(4 / len(editables))))
 
         return layout, editables
+
+    @property
+    def _researchers(self):
+        results = self._db_manager.query(f"""
+            SELECT CONCAT(imie, ' ', nazwisko) FROM PracownicyNaukowi
+            """)
+        return (result[0] for result in results)
+
+    @property
+    def _careers(self):
+        results = self._db_manager.query(f"""
+                SELECT CONCAT(nazwaKierunku, ' - ', W.nazwaWydzialu) FROM KierunekStudiow
+                    LEFT JOIN Katedra K on KierunekStudiow.id_katedra = K.id_Katedra
+                    LEFT JOIN Wydzial W on K.id_Wydzial = W.id_Wydzial
+                """)
+        return (result[0] for result in results)

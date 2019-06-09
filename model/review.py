@@ -10,7 +10,7 @@ class Review(Base):
     id_recenzja = Column(SMALLINT, primary_key=True)
     id_praca = Column(SMALLINT, nullable=False)
     id_recenzujacy = Column(SMALLINT, nullable=False)
-    ocena = Column(NUMERIC)
+    ocena = Column(NUMERIC(2, 1))
     tekstRecenzji = Column(VARCHAR("max"))
     dataWystawienia = Column(DATETIME)
 

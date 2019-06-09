@@ -27,6 +27,7 @@ class DatabaseManager:
         else:
             DatabaseManager.__instance__ = self
             self._engine = self.__start_engine()
+            self.query("SELECT * FROM Katedra")
 
     def set_delegate(self, delegate):
         self._delegate = delegate

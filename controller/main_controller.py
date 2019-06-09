@@ -99,6 +99,29 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
                 INNER JOIN StopienNaukowy SN on PN.id_stopienNaukowy = SN.id_stopienNaukowy
             WHERE CONCAT(PN.imie, ' ', PN.nazwisko, ' ', SN.nazwaStopniaNaukowego) LIKE '%{search_query_text}%'
             """), column_count=5)
+        elif self._search_type == SearchType.THESES:
+            view.set_table_view(self._db_manager.query(f"""
+            SELECT x.tytul,
+                   STRING_AGG(x.autor, ', ') AS Autorzy,
+                   x.promotor AS Promotor,
+                   x.recenzenci AS Recenzenci
+            FROM (
+                SELECT DISTINCT PD.tytul,
+                                CONCAT(S.imie, ' ', S.nazwisko) autor,
+                                CONCAT(PN.imie, ' ', PN.nazwisko) promotor,
+                                STRING_AGG(CONCAT(PNR.imie, ' ', PNR.nazwisko), ', ') recenzenci
+                FROM AutorzyPracy AP
+                     LEFT JOIN PraceDyplomowe PD on AP.id_praca = PD.id_praca
+                     LEFT JOIN Studenci S on AP.id_student = S.id_student
+                     LEFT JOIN PracownicyNaukowi PN on PD.id_promotor = PN.id_pracownikNaukowy
+                     LEFT JOIN Recenzja R on AP.id_praca = R.id_praca
+                     LEFT JOIN PracownicyNaukowi PNR on R.id_recenzujacy = PNR.id_pracownikNaukowy
+                GROUP BY PD.tytul, CONCAT(S.imie, ' ', S.nazwisko), CONCAT(PN.imie, ' ', PN.nazwisko)
+            ) x
+            GROUP BY x.tytul, x.promotor, x.recenzenci
+            HAVING CONCAT(x.tytul, ' ', STRING_AGG(x.autor, ', '), ' ', x.promotor, ' ', x.recenzenci) 
+                LIKE '%{search_query_text}%'
+            """))
 
     def view_did_choose_to_display_students(self, view):
         print(f"view_did_choose_to_display_students: ")
@@ -213,14 +236,84 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
         print(f"view_did_select_adding_review: {data}")
 
     # GenerateReportViewDelegate methods
-    def view_did_select_theses_assigned_to_researcher(self, view):
-        print(f"view_did_select_theses_assigned_to_researcher: ")
+    def view_did_select_theses_assigned_to_researcher(self, view, researcher):
+        print(f"view_did_select_theses_assigned_to_researcher: {researcher}")
+        view.set_table_view(self._db_manager.query(f"""
+            SELECT x.tytul,
+                   STRING_AGG(x.autor, ', ') AS Autorzy,
+                   x.recenzent AS Recenzent
+                   ,x.ocena,
+                   x.tekstRecenzji
+            FROM (
+                SELECT DISTINCT PD.tytul,
+                                CONCAT(S.imie, ' ', S.nazwisko) autor,
+                                CONCAT(PNR.imie, ' ', PNR.nazwisko) recenzent,
+                                R.ocena,
+                                R.tekstRecenzji
+                FROM AutorzyPracy AP
+                     LEFT JOIN PraceDyplomowe PD on AP.id_praca = PD.id_praca
+                     LEFT JOIN Studenci S on AP.id_student = S.id_student
+                     LEFT JOIN PracownicyNaukowi PN on PD.id_promotor = PN.id_pracownikNaukowy
+                     LEFT JOIN Recenzja R on AP.id_praca = R.id_praca
+                     LEFT JOIN PracownicyNaukowi PNR on R.id_recenzujacy = PNR.id_pracownikNaukowy
+            ) x
+            GROUP BY x.tytul, x.recenzent, x.ocena, x.tekstRecenzji
+            HAVING x.recenzent = '{researcher}'
+            """))
 
-    def view_did_select_theses_between_dates(self, view):
-        print(f"view_did_select_theses_between_dates: ")
+    def view_did_select_theses_between_dates(self, view, date1, date2):
+        print(f"view_did_select_theses_between_dates: {date1}, {date2}")
+        view.set_table_view(self._db_manager.query(f"""
+            SELECT x.tytul,
+                   STRING_AGG(x.autor, ', ') AS Autorzy,
+                   x.recenzent AS Recenzent
+                   ,x.ocena,
+                   x.tekstRecenzji
+            FROM (
+                SELECT DISTINCT PD.tytul,
+                                CONCAT(S.imie, ' ', S.nazwisko) autor,
+                                CONCAT(PNR.imie, ' ', PNR.nazwisko) recenzent,
+                                R.ocena,
+                                R.tekstRecenzji,
+                                O.data
+                FROM AutorzyPracy AP
+                     LEFT JOIN PraceDyplomowe PD on AP.id_praca = PD.id_praca
+                     LEFT JOIN Studenci S on AP.id_student = S.id_student
+                     LEFT JOIN PracownicyNaukowi PN on PD.id_promotor = PN.id_pracownikNaukowy
+                     LEFT JOIN Recenzja R on AP.id_praca = R.id_praca
+                     LEFT JOIN PracownicyNaukowi PNR on R.id_recenzujacy = PNR.id_pracownikNaukowy
+                     LEFT JOIN Obrona O on PD.id_praca = O.id_praca
+            ) x
+            GROUP BY x.tytul, x.recenzent, x.ocena, x.tekstRecenzji, x.data
+            HAVING x.data >= '{date1}' AND x.data <= '{date2}'
+            """))
 
-    def view_did_select_theses_on_career(self, view):
-        print(f"view_did_select_theses_on_career: ")
+    def view_did_select_theses_on_career(self, view, career):
+        print(f"view_did_select_theses_on_career: {career}")
+        view.set_table_view(self._db_manager.query(f"""
+        SELECT x.tytul,
+               STRING_AGG(x.autor, ', ') AS Autorzy,
+               x.recenzent AS Recenzent
+               ,x.ocena,
+               x.tekstRecenzji
+        FROM (
+            SELECT DISTINCT PD.tytul,
+                            CONCAT(S.imie, ' ', S.nazwisko) autor,
+                            CONCAT(PNR.imie, ' ', PNR.nazwisko) recenzent,
+                            R.ocena,
+                            R.tekstRecenzji,
+                            KS.nazwaKierunku
+            FROM AutorzyPracy AP
+                 LEFT JOIN PraceDyplomowe PD on AP.id_praca = PD.id_praca
+                 LEFT JOIN Studenci S on AP.id_student = S.id_student
+                 LEFT JOIN PracownicyNaukowi PN on PD.id_promotor = PN.id_pracownikNaukowy
+                 LEFT JOIN Recenzja R on AP.id_praca = R.id_praca
+                 LEFT JOIN PracownicyNaukowi PNR on R.id_recenzujacy = PNR.id_pracownikNaukowy
+                 LEFT JOIN KierunekStudiow KS on PD.id_kierunekStudiow = KS.id_kierunek
+        ) x
+        GROUP BY x.tytul, x.recenzent, x.ocena, x.tekstRecenzji, x.nazwaKierunku
+        HAVING x.nazwaKierunku = '{career}'
+            """))
 
     # OptionsMenuViewDelegate methods
     def view_did_select_option(self, view, option):

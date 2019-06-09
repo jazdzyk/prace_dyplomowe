@@ -1,9 +1,9 @@
-from manager import DatabaseManager
-from view import BaseView
-from PyQt5.QtWidgets import QLabel, QLineEdit, QTextEdit, QPushButton, QHBoxLayout, QDateEdit, QListView, QComboBox
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtCore import Qt, QDate
 from PyQt5.Qt import QAbstractItemView
+from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtWidgets import QLabel, QLineEdit, QTextEdit, QPushButton, QHBoxLayout, QDateEdit, QListView, QComboBox
+
+from view import BaseView
 
 
 class BaseAddModifyView(BaseView):
@@ -14,7 +14,6 @@ class BaseAddModifyView(BaseView):
         self._set_up_general()
 
     def _set_up_general(self):
-        self._db_manager = DatabaseManager.instance()
         self._title = f"{self._title_prefix} {self._title_suffix}"
         self._editable_fields = {}
         self._data = {}
@@ -51,7 +50,7 @@ class BaseAddModifyView(BaseView):
 
     def _on_date_edit_date_changed(self, key, field):
         def _callback():
-            self._data[key] = self.__format_date_string(field.date())
+            self._data[key] = self._format_date_string(field.date())
 
         return _callback
 
@@ -88,7 +87,7 @@ class BaseAddModifyView(BaseView):
                 self._data[key] = field.currentText()
             elif isinstance(field, QDateEdit):
                 field.setDate(QDate.currentDate())
-                self._data[key] = self.__format_date_string(QDate.currentDate())
+                self._data[key] = self._format_date_string(QDate.currentDate())
                 field.dateChanged.connect(self._on_date_edit_date_changed(key, field))
             elif isinstance(field, QTextEdit):
                 field.textChanged.connect(self._on_text_edit_text_changed(key, field))
@@ -129,7 +128,7 @@ class BaseAddModifyView(BaseView):
                 combo_box_count += 1
             elif isinstance(field, QDateEdit):
                 field.setDate(date_edit_values[date_edit_count])
-                self._data[key] = self.__format_date_string(date_edit_values[date_edit_count])
+                self._data[key] = self._format_date_string(date_edit_values[date_edit_count])
                 date_edit_count += 1
             elif isinstance(field, QTextEdit):
                 field.setText(text_edit_values[text_edit_count])
@@ -159,7 +158,3 @@ class BaseAddModifyView(BaseView):
         layout.addWidget(editable, 4)
 
         return layout
-
-    @staticmethod
-    def __format_date_string(date):
-        return f"20{date.year()}{date.month():02d}{date.day():02d} 08:00:00 AM"

@@ -5,7 +5,7 @@ from PyQt5.QtSql import QSqlTableModel, QSqlQueryModel
 from PyQt5.QtWidgets import QGroupBox, QRadioButton, QLineEdit, QPushButton, QTableView, QVBoxLayout, QHBoxLayout, \
     QAbstractItemView, QHeaderView
 
-from model.table import PeopleTableModel
+from model.table import PeopleTableModel, ThesesTableModel
 from protocols import SearchDataViewDelegate
 from view import BaseView
 
@@ -26,11 +26,14 @@ class SearchDataView(BaseView):
         self._set_up_general()
         self._set_up_ui()
 
-    def set_table_view(self, data, column_count):
+    def set_table_view(self, data, column_count=None):
         def on_table_selected_row(selected, deselected):
             self._selected_row = [index.data() for index in selected.indexes()]
 
-        model = PeopleTableModel(data, column_count)
+        if self._range_option == SearchDataView.__SearchRangeOption.PEOPLE:
+            model = PeopleTableModel(data, column_count)
+        elif self._range_option == SearchDataView.__SearchRangeOption.THESES:
+            model = ThesesTableModel(data)
         self._table_view.setModel(model)
         self._table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self._table_view.setSelectionBehavior(QAbstractItemView.SelectRows)

@@ -1,1 +1,3 @@
 from model.table.people_table_model import PeopleTableModel
+from model.table.theses_table_model import ThesesTableModel
+from model.table.report_table_model import ReportTableModel

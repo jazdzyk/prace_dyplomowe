@@ -9,7 +9,7 @@ class ThesesAuthors(Base):
 
     id_student = Column(VARCHAR(10), primary_key=True)
     id_praca = Column(SMALLINT, primary_key=True)
-    ocenaKoncowa = Column(NUMERIC)
+    ocenaKoncowa = Column(NUMERIC(2, 1))
 
     def __repr__(self):
         return f"<{self.__tablename__}(id_student={self.id_student}, id_praca={self.id_praca}, " \
