@@ -21,3 +21,7 @@ class SearchDataViewDelegate(ABC):
     @abstractmethod
     def view_did_toggle_search_range_option(self, view, search_range_option):
         raise NotImplementedError
+
+    @abstractmethod
+    def view_wants_to_display_detailed_data(self, view, selected_row):
+        raise NotImplementedError

@@ -7,7 +7,7 @@ Base = declarative_base()
 class Students(Base):
     __tablename__ = "Studenci"
 
-    id_student = Column(VARCHAR(10), primary_key=True)
+    id_student = Column(VARCHAR(10), primary_key=True, autoincrement=False)
     imie = Column(VARCHAR("max"), nullable=False)
     nazwisko = Column(VARCHAR("max"), nullable=False)
     telefon = Column(VARCHAR(11), nullable=False)

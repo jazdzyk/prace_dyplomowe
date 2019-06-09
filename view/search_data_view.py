@@ -1,12 +1,21 @@
 from enum import Enum
 
-from PyQt5.QtWidgets import QGroupBox, QRadioButton, QLineEdit, QPushButton, QTableView, QVBoxLayout, QHBoxLayout
+from PyQt5.QtCore import Qt
+from PyQt5.QtSql import QSqlTableModel, QSqlQueryModel
+from PyQt5.QtWidgets import QGroupBox, QRadioButton, QLineEdit, QPushButton, QTableView, QVBoxLayout, QHBoxLayout, \
+    QAbstractItemView, QHeaderView
 
+from model.table import PeopleTableModel
 from protocols import SearchDataViewDelegate
 from view import BaseView
 
 
 class SearchDataView(BaseView):
+    class SearchType(Enum):
+        STUDENTS = 0
+        RESEARCHERS = 1
+        THESES = 2
+
     class __SearchRangeOption(Enum):
         PEOPLE = 0
         THESES = 1
@@ -17,10 +26,22 @@ class SearchDataView(BaseView):
         self._set_up_general()
         self._set_up_ui()
 
+    def set_table_view(self, data, column_count):
+        def on_table_selected_row(selected, deselected):
+            self._selected_row = [index.data() for index in selected.indexes()]
+
+        model = PeopleTableModel(data, column_count)
+        self._table_view.setModel(model)
+        self._table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self._table_view.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self._table_view.selectionModel().selectionChanged.connect(on_table_selected_row)
+        self._table_view.show()
+
     def _set_up_general(self):
         self._title = " Wyszukaj..."
         self._range_option = SearchDataView.__SearchRangeOption.PEOPLE
         self._search_query_text = ""
+        self._selected_row = None
 
     def _set_up_ui(self):
         self.__set_up_range_box()
@@ -60,7 +81,8 @@ class SearchDataView(BaseView):
             self._search_query_text = line_edit.text()
 
         def on_button_clicked():
-            self._delegate.view_did_press_search_button(self, line_edit.text())
+            self._search_query_text = line_edit.text()
+            self._delegate.view_did_press_search_button(self, self._search_query_text)
 
         def on_line_edit_return_pressed():
             on_button_clicked()
@@ -80,11 +102,21 @@ class SearchDataView(BaseView):
         self._layout.addWidget(group_box)
 
     def __set_up_results_box(self):
-        table_view = QTableView()
+        self._table_view = QTableView()
+
+        def on_button_clicked():
+            self._delegate.view_wants_to_display_detailed_data(self, self._selected_row)
+
+        button = QPushButton("Podgląd danych")
+        button.clicked.connect(on_button_clicked)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch(1)
+        button_layout.addWidget(button)
 
         layout = QVBoxLayout()
         layout.addLayout(self.__create_results_buttons())
-        layout.addWidget(table_view)
+        layout.addWidget(self._table_view)
+        layout.addLayout(button_layout)
 
         group_box = QGroupBox("Wyniki wyszukiwania")
         group_box.setLayout(layout)
@@ -93,12 +125,15 @@ class SearchDataView(BaseView):
     def __create_results_buttons(self):
         def on_left_button_clicked():
             self._delegate.view_did_choose_to_display_students(self)
+            self._delegate.view_did_press_search_button(self, self._search_query_text)
 
         def on_mid_button_clicked():
             self._delegate.view_did_choose_to_display_researchers(self)
+            self._delegate.view_did_press_search_button(self, self._search_query_text)
 
         def on_right_button_clicked():
             self._delegate.view_did_choose_to_display_theses(self)
+            self._delegate.view_did_press_search_button(self, self._search_query_text)
 
         self._results_left_button = QPushButton("Studenci")
         self._results_left_button.clicked.connect(on_left_button_clicked)

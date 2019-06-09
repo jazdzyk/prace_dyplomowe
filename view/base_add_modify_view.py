@@ -1,3 +1,4 @@
+from manager import DatabaseManager
 from view import BaseView
 from PyQt5.QtWidgets import QLabel, QLineEdit, QTextEdit, QPushButton, QHBoxLayout, QDateEdit, QListView, QComboBox
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
@@ -13,6 +14,7 @@ class BaseAddModifyView(BaseView):
         self._set_up_general()
 
     def _set_up_general(self):
+        self._db_manager = DatabaseManager.instance()
         self._title = f"{self._title_prefix} {self._title_suffix}"
         self._editable_fields = {}
         self._data = {}
@@ -160,4 +162,4 @@ class BaseAddModifyView(BaseView):
 
     @staticmethod
     def __format_date_string(date):
-        return f"{date.day()}-{date.month()}-{date.year()}"
+        return f"20{date.year()}{date.month():02d}{date.day():02d} 08:00:00 AM"

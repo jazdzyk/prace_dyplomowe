@@ -23,9 +23,9 @@ class AddResearcherView(BaseAddModifyView):
             ("Katedra", QComboBox)
         ]
         self._combo_box_items = [
-            ("dr", "dr inż.", "dr hab.", "dr hab. inż.", "prof. nadzw.", "prof."),
-            ("EAIIB", "IMiR", "IET"),
-            ("pierwsza", "druga", "trzecia")
+            self._degrees,
+            self._faculties,
+            self._academic_departments
         ]
 
     def _set_up_ui(self):
@@ -36,3 +36,25 @@ class AddResearcherView(BaseAddModifyView):
         self._create_layout(fields=self._fields,
                             delegate_function=delegate_function)
         self._add_callbacks()
+
+    @property
+    def _degrees(self):
+        results = self._db_manager.query(f"""
+        SELECT nazwaStopniaNaukowego FROM StopienNaukowy
+        """)
+        return (result[0] for result in results)
+
+    @property
+    def _faculties(self):
+        results = self._db_manager.query(f"""
+        SELECT nazwaWydzialu FROM Wydzial
+        """)
+        return (result[0] for result in results)
+
+    @property
+    def _academic_departments(self):
+        results = self._db_manager.query(f"""
+        SELECT nazwaKatedry FROM Katedra
+        WHERE id_Wydzial = 2
+        """)
+        return (result[0] for result in results)

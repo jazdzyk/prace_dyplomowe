@@ -1,0 +1,1 @@
+from model.table.people_table_model import PeopleTableModel
