@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QTableView, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QTableView, QPushButton, QHBoxLayout, QHeaderView, QAbstractItemView
 
+from model.table.management_table_model import ManagementTableModel
 from protocols import ManageThesesViewDelegate
 from view import BaseView
 
@@ -11,15 +12,26 @@ class ManageThesesView(BaseView):
         self._set_up_general()
         self._set_up_ui()
 
+    def set_table_view(self, data):
+        def on_table_selected_row(selected, deselected):
+            self._selected_row = [index.data() for index in selected.indexes()]
+
+        model = ManagementTableModel(data)
+        self._table_view.setModel(model)
+        self._table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self._table_view.selectionModel().selectionChanged.connect(on_table_selected_row)
+        self._table_view.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self._table_view.show()
+
     def _set_up_general(self):
         self._title = "Zarządzaj pracami dyplomowymi"
-        self._selected_data = None
+        self._selected_row = None
 
     def _set_up_ui(self):
-        table_view = QTableView()
+        self._table_view = QTableView()
 
         self._layout.addLayout(self.__create_top_buttons())
-        self._layout.addWidget(table_view)
+        self._layout.addWidget(self._table_view)
         self._layout.addLayout(self.__create_bottom_buttons())
         self._layout.addStretch(1)
 
@@ -43,10 +55,10 @@ class ManageThesesView(BaseView):
 
     def __create_bottom_buttons(self):
         def on_left_button_clicked():
-            self._delegate.view_did_select_displaying_data(self, self._selected_data)
+            self._delegate.view_did_select_displaying_data(self, self._selected_row)
 
         def on_right_button_clicked():
-            self._delegate.view_did_select_adding_review(self, self._selected_data)
+            self._delegate.view_did_select_adding_review(self, self._selected_row)
 
         left_button = QPushButton("Podgląd danych")
         left_button.clicked.connect(on_left_button_clicked)

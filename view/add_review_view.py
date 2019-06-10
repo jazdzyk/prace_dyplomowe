@@ -11,6 +11,9 @@ class AddReviewView(BaseAddModifyView):
         self._set_up_general()
         self._set_up_ui()
 
+    def set_displayed_thesis(self, thesis_title):
+        self._editable_fields["Praca dyplomowa"].setCurrentText(thesis_title)
+
     def _set_up_general(self):
         BaseAddModifyView._set_up_general(self)
         self._fields = [
@@ -19,7 +22,7 @@ class AddReviewView(BaseAddModifyView):
             ("Komentarz", QTextEdit)
         ]
         self._combo_box_items = [
-            ("dr", "dr inż.", "dr hab.", "dr hab. inż.", "prof. nadzw.", "prof.")
+            self._theses
         ]
 
     def _set_up_ui(self):
@@ -30,3 +33,10 @@ class AddReviewView(BaseAddModifyView):
         self._create_layout(fields=self._fields,
                             delegate_function=delegate_function)
         self._add_callbacks()
+
+    @property
+    def _theses(self):
+        results = self._db_manager.query(f"""
+                    SELECT tytul FROM PraceDyplomowe
+                    """)
+        return (result[0] for result in results)
