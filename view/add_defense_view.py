@@ -21,9 +21,9 @@ class AddDefenseView(BaseAddModifyView):
             ("Ocena końcowa", QLineEdit)
         ]
         self._combo_box_items = [
-            ("pierwsza", "druga", "trzecia"),
-            ("pierwszy", "drugi", "trzeci"),
-            ("pierwsza", "druga", "trzecia")
+            self._theses,
+            self._researchers,
+            self._places
         ]
 
     def _set_up_ui(self):
@@ -34,3 +34,24 @@ class AddDefenseView(BaseAddModifyView):
         self._create_layout(fields=self._fields,
                             delegate_function=delegate_function)
         self._add_callbacks()
+
+    @property
+    def _theses(self):
+        results = self._db_manager.query(f"""
+                SELECT tytul FROM PraceDyplomowe
+                """)
+        return (result[0] for result in results)
+
+    @property
+    def _researchers(self):
+        results = self._db_manager.query(f"""
+                    SELECT CONCAT(imie, ' ', nazwisko) FROM PracownicyNaukowi
+                    """)
+        return (result[0] for result in results)
+
+    @property
+    def _places(self):
+        results = self._db_manager.query(f"""
+                    SELECT CONCAT(sala, ', ', budynek) FROM Lokalizacja
+                    """)
+        return (result[0] for result in results)

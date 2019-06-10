@@ -28,6 +28,6 @@ class ModifyStudentView(AddStudentView):
     def _line_edit_values(self):
         results = self._db_manager.query(f"""
         SELECT imie, nazwisko, telefon, email FROM Studenci
-        WHERE id_student = '{self._editable_fields["ID Studenta"].curentText().split(" - ")[0]}'
+        WHERE id_student = '{self._editable_fields["ID Studenta"].currentText().split(" - ")[0]}'
         """)
         return [value for value in results[0]]

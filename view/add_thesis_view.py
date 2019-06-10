@@ -24,17 +24,14 @@ class AddThesisView(BaseAddModifyView):
             ("Słowa kluczowe", QLineEdit)
         ]
         self._combo_box_items = [
-            ("licencjackie", "inżynierskie", "magisterskie", "doktoranckie"),
-            ("EAIIB", "IMiR", "IET"),
-            ("pierwszy", "drugi", "trzeci"),
-            ("Józek Józek", "Władziu Władziu", "Zdzisław Zdzisław", "Stasiu Stasiu")
+            self._studies_type,
+            self._faculties,
+            self._courses,
+            self._researchers
         ]
         self._list_view_items = [
-            ("Adam Małysz", "Robert Mateja", "Simon Amann", "Łukasz Kruczek", "Jan Kowalski", "Zdzisław Kowalski",
-             "Jan Kowal", "Zygmunt Staszczyk", "Adam Małysz", "Robert Mateja", "Simon Amann", "Łukasz Kruczek",
-             "Jan Kowalski", "Adam Małysz", "Robert Mateja", "Simon Amann", "Łukasz Kruczek", "Jan Kowalski"),
-            ("Jan Kowalski", "Zdzisław Kowalski", "Adam Małysz", "Robert Mateja", "Simon Amann", "Łukasz Kruczek",
-             "Jan Kowal", "Zygmunt Staszczyk")
+            self._students,
+            self._researchers
         ]
 
     def _set_up_ui(self):
@@ -45,3 +42,41 @@ class AddThesisView(BaseAddModifyView):
         self._create_layout(fields=self._fields,
                             delegate_function=delegate_function)
         self._add_callbacks()
+
+    @property
+    def _studies_type(self):
+        results = self._db_manager.query(f"""
+                SELECT nazwaRodzaju FROM RodzajStudiow
+                """)
+        return (result[0] for result in results)
+
+    @property
+    def _faculties(self):
+        results = self._db_manager.query(f"""
+            SELECT nazwaWydzialu FROM Wydzial
+            """)
+        return (result[0] for result in results)
+
+    @property
+    def _courses(self):
+        results = self._db_manager.query(f"""
+            SELECT nazwaKierunku FROM KierunekStudiow
+                LEFT JOIN Katedra K on KierunekStudiow.id_katedra = K.id_Katedra
+            WHERE id_Wydzial = 2
+            """)
+        return (result[0] for result in results)
+
+    @property
+    def _researchers(self):
+        results = self._db_manager.query(f"""
+                SELECT CONCAT(imie, ' ', nazwisko) FROM PracownicyNaukowi
+                """)
+        return (result[0] for result in results)
+
+    @property
+    def _students(self):
+        results = self._db_manager.query(f"""
+                    SELECT CONCAT(imie, ' ', nazwisko) FROM Studenci
+                    """)
+        return (result[0] for result in results)
+
