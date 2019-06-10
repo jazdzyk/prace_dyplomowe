@@ -8,7 +8,7 @@ from protocols import SearchDataViewDelegate, AddModifyViewDelegate, ManageThese
     GenerateReportViewDelegate, OptionsMenuViewDelegate, DatabaseManagerDelegate
 from view import AddDefenseView, OptionsMenuView, AddResearcherView, AddReviewView, AddStudentView, AddThesisView, \
     GenerateReportView, ManageThesesView, ModifyDefenseView, ModifyResearcherView, ModifyStudentView, ModifyThesisView, \
-    SearchDataView
+    SearchDataView, DisplayDataView
 
 
 class MainControllerMeta(type(QMainWindow), type(SearchDataViewDelegate)):
@@ -126,20 +126,107 @@ class MainController(QMainWindow, SearchDataViewDelegate, AddModifyViewDelegate,
     def view_did_choose_to_display_students(self, view):
         print(f"view_did_choose_to_display_students: ")
         self._search_type = SearchType.STUDENTS
+        view.set_detailed_view_enabled(False)
 
     def view_did_choose_to_display_researchers(self, view):
         print(f"view_did_choose_to_display_researchers: ")
         self._search_type = SearchType.RESEARCHERS
+        view.set_detailed_view_enabled(False)
 
     def view_did_choose_to_display_theses(self, view):
         print(f"view_did_choose_to_display_theses: ")
         self._search_type = SearchType.THESES
+        view.set_detailed_view_enabled(True)
 
     def view_did_toggle_search_range_option(self, view, search_range_option):
         print(f"view_did_toggle_search_range_option: {search_range_option}")
+        view.set_detailed_view_enabled(search_range_option == SearchDataView._SearchRangeOption.THESES)
 
     def view_wants_to_display_detailed_data(self, view, selected_row):
         print(f"view_wants_to_display_detailed_data: {selected_row}")
+        detailed_display_view = DisplayDataView(self.centralWidget())
+        self._set_up_action_view(detailed_display_view)
+        data = {}
+        data["Temat"] = selected_row[0]
+        data["Autorzy"] = "\n".join(s.lstrip().rstrip() for s in selected_row[1].split(","))
+        data["Promotor"] = selected_row[2]
+        data["Recenzenci"] = "\n".join(s.lstrip().rstrip() for s in selected_row[3].split(","))
+        data["Ocena promotora"] = str(self._db_manager.query(f"""
+        SELECT ocenaPromotora FROM PraceDyplomowe PD
+            LEFT JOIN PracownicyNaukowi PN on PD.id_promotor = PN.id_pracownikNaukowy
+        WHERE PD.tytul = '{data["Temat"]}' AND CONCAT(PN.imie, ' ', PN.nazwisko) = '{data["Promotor"]}'
+        """)[0][0])
+        data["Oceny recenzentów"] = "\n".join(str(grade[0]) for grade in self._db_manager.query(f"""
+                SELECT ocena FROM Recenzja
+                LEFT JOIN PraceDyplomowe PD on Recenzja.id_praca = PD.id_praca
+                LEFT JOIN PracownicyNaukowi PN on Recenzja.id_recenzujacy = PN.id_pracownikNaukowy
+                WHERE PD.tytul = '{data["Temat"]}' 
+                    AND CONCAT(PN.imie, ' ', PN.nazwisko) 
+                        IN ({str(", ".join(f"'{s.lstrip().rstrip()}'" for s in selected_row[3].split(",")))})
+                """))
+        data["Komentarz promotora"] = self._db_manager.query(f"""
+        SELECT komentarzPromotora FROM PraceDyplomowe PD
+            LEFT JOIN PracownicyNaukowi PN on PD.id_promotor = PN.id_pracownikNaukowy
+        WHERE PD.tytul = '{data["Temat"]}' AND CONCAT(PN.imie, ' ', PN.nazwisko) = '{data["Promotor"]}'
+        """)[0][0]
+        data["Komentarze recenzentów"] = "\n".join(str(grade[0]) for grade in self._db_manager.query(f"""
+                SELECT tekstRecenzji FROM Recenzja
+                LEFT JOIN PraceDyplomowe PD on Recenzja.id_praca = PD.id_praca
+                LEFT JOIN PracownicyNaukowi PN on Recenzja.id_recenzujacy = PN.id_pracownikNaukowy
+                WHERE PD.tytul = '{data["Temat"]}' 
+                    AND CONCAT(PN.imie, ' ', PN.nazwisko) 
+                        IN ({str(", ".join(f"'{s.lstrip().rstrip()}'" for s in selected_row[3].split(",")))})
+                """))
+        data["Słowa kluczowe"] = ", ".join(keyword[0] for keyword in self._db_manager.query(f"""
+        SELECT SK.slowoKluczowe FROM SlowaKluczowePracy
+            LEFT JOIN PraceDyplomowe PD on SlowaKluczowePracy.id_praca = PD.id_praca
+            LEFT JOIN SlowaKluczowe SK on SlowaKluczowePracy.id_slowoKluczowe = SK.id_slowoKluczowe
+        WHERE PD.tytul = '{data["Temat"]}'
+        """))
+        data["Kierunek studiów"] = self._db_manager.query(f"""
+        SELECT nazwaKierunku FROM KierunekStudiow
+            LEFT JOIN PraceDyplomowe PD on KierunekStudiow.id_kierunek = PD.id_kierunekStudiow
+        WHERE PD.tytul = 'Implementacja algorytmu do generacji mikrostruktur 2D, 3D'
+        """)[0][0]
+        data["Rodzaj studiów"] = self._db_manager.query(f"""
+        SELECT nazwaRodzaju FROM RodzajStudiow
+            LEFT JOIN KierunekStudiow KS on RodzajStudiow.id_rodzajStudiow = KS.id_rodzajStudiow
+            LEFT JOIN PraceDyplomowe PD on KS.id_kierunek = PD.id_kierunekStudiow
+        WHERE PD.tytul = 'Implementacja algorytmu do generacji mikrostruktur 2D, 3D'
+        """)[0][0]
+        data["Katedra"] = self._db_manager.query(f"""
+        SELECT nazwaKatedry FROM Katedra
+            LEFT JOIN KierunekStudiow KS on Katedra.id_Katedra = KS.id_katedra
+            LEFT JOIN PraceDyplomowe PD on KS.id_kierunek = PD.id_kierunekStudiow
+        WHERE PD.tytul = 'Implementacja algorytmu do generacji mikrostruktur 2D, 3D'
+        """)[0][0]
+        data["Wydział"] = self._db_manager.query(f"""
+        SELECT nazwaWydzialu FROM Wydzial
+            LEFT JOIN Katedra K on Wydzial.id_Wydzial = K.id_Wydzial
+            LEFT JOIN KierunekStudiow KS on K.id_Katedra = KS.id_katedra
+            LEFT JOIN PraceDyplomowe PD on KS.id_kierunek = PD.id_kierunekStudiow
+        WHERE PD.tytul = 'Implementacja algorytmu do generacji mikrostruktur 2D, 3D'
+        """)[0][0]
+        data["Data obrony"] = str(self._db_manager.query(f"""
+        SELECT data FROM Obrona
+            LEFT JOIN PraceDyplomowe PD on Obrona.id_praca = PD.id_praca
+        WHERE PD.tytul = 'Implementacja algorytmu do generacji mikrostruktur 2D, 3D'
+        """)[0][0]).split(" ")[0]
+        data["Przewodniczący komisji"] = self._db_manager.query(f"""
+        SELECT CONCAT(PN.imie, ' ', PN.nazwisko) FROM KomisjaDyplomowa
+            LEFT JOIN PracownicyNaukowi PN on KomisjaDyplomowa.id_przewodniczacy = PN.id_pracownikNaukowy
+            LEFT JOIN Obrona O on KomisjaDyplomowa.id_komisja = O.id_komisja
+            LEFT JOIN PraceDyplomowe PD on O.id_praca = PD.id_praca
+        WHERE PD.tytul = 'Implementacja algorytmu do generacji mikrostruktur 2D, 3D'
+        """)[0][0]
+        data["Ocena ostateczna"] = "\n".join(str(grade[0]) for grade in self._db_manager.query(f"""
+        SELECT ocenaKoncowa FROM AutorzyPracy
+            LEFT JOIN PraceDyplomowe PD on AutorzyPracy.id_praca = PD.id_praca
+        WHERE PD.tytul = 'Implementacja algorytmu do generacji mikrostruktur 2D, 3D'
+        """))
+        for key in data:
+            print(data[key])
+        detailed_display_view.update_displayed_values(data)
 
     # AddModifyViewDelegate methods
     def view_did_press_add_button(self, view, data):

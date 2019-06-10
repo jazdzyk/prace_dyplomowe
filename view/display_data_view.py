@@ -19,11 +19,11 @@ class DisplayDataView(BaseView):
 
     def _set_up_ui(self):
         data = (
-            ("Temat", True), ("Autorzy", True), ("Promotor", True), ("Ocena promotora", True),
-            ("Komentarz promotora", False), ("Recenzenci", True), ("Oceny recenzentów", True),
-            ("Komentarze recenzentów", False), ("Słowa kluczowe", False), ("Kierunek studiów", True),
+            ("Temat", True), ("Autorzy", False), ("Promotor", True), ("Ocena promotora", True),
+            ("Komentarz promotora", False), ("Recenzenci", False), ("Oceny recenzentów", False),
+            ("Komentarze recenzentów", False), ("Słowa kluczowe", True), ("Kierunek studiów", True),
             ("Rodzaj studiów", True), ("Katedra", True), ("Wydział", True), ("Data obrony", True),
-            ("Przewodniczący komisji", True), ("Ocena ostateczna", True)
+            ("Przewodniczący komisji", True), ("Ocena ostateczna", False)
         )
 
         for _data in data:

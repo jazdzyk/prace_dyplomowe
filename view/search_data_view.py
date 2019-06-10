@@ -16,7 +16,7 @@ class SearchDataView(BaseView):
         RESEARCHERS = 1
         THESES = 2
 
-    class __SearchRangeOption(Enum):
+    class _SearchRangeOption(Enum):
         PEOPLE = 0
         THESES = 1
 
@@ -30,9 +30,9 @@ class SearchDataView(BaseView):
         def on_table_selected_row(selected, deselected):
             self._selected_row = [index.data() for index in selected.indexes()]
 
-        if self._range_option == SearchDataView.__SearchRangeOption.PEOPLE:
+        if self._range_option == SearchDataView._SearchRangeOption.PEOPLE:
             model = PeopleTableModel(data, column_count)
-        elif self._range_option == SearchDataView.__SearchRangeOption.THESES:
+        elif self._range_option == SearchDataView._SearchRangeOption.THESES:
             model = ThesesTableModel(data)
         self._table_view.setModel(model)
         self._table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -40,9 +40,12 @@ class SearchDataView(BaseView):
         self._table_view.selectionModel().selectionChanged.connect(on_table_selected_row)
         self._table_view.show()
 
+    def set_detailed_view_enabled(self, should_enable):
+        self._display_button.setEnabled(should_enable)
+
     def _set_up_general(self):
         self._title = " Wyszukaj..."
-        self._range_option = SearchDataView.__SearchRangeOption.PEOPLE
+        self._range_option = SearchDataView._SearchRangeOption.PEOPLE
         self._search_query_text = ""
         self._selected_row = None
 
@@ -58,10 +61,10 @@ class SearchDataView(BaseView):
 
     def __set_up_range_box(self):
         def on_left_radio_button_clicked():
-            self._set_range_option(SearchDataView.__SearchRangeOption.PEOPLE)
+            self._set_range_option(SearchDataView._SearchRangeOption.PEOPLE)
 
         def on_right_radio_button_clicked():
-            self._set_range_option(SearchDataView.__SearchRangeOption.THESES)
+            self._set_range_option(SearchDataView._SearchRangeOption.THESES)
 
         left_radio_button = QRadioButton("Osoby")
         left_radio_button.setChecked(True)
@@ -115,6 +118,8 @@ class SearchDataView(BaseView):
         button_layout = QHBoxLayout()
         button_layout.addStretch(1)
         button_layout.addWidget(button)
+        button.setEnabled(False)
+        self._display_button = button
 
         layout = QVBoxLayout()
         layout.addLayout(self.__create_results_buttons())
@@ -154,6 +159,6 @@ class SearchDataView(BaseView):
         return layout
 
     def __update_results_box(self):
-        self._results_left_button.setEnabled(self._range_option == SearchDataView.__SearchRangeOption.PEOPLE)
-        self._results_mid_button.setEnabled(self._range_option == SearchDataView.__SearchRangeOption.PEOPLE)
-        self._results_right_buton.setEnabled(self._range_option == SearchDataView.__SearchRangeOption.THESES)
+        self._results_left_button.setEnabled(self._range_option == SearchDataView._SearchRangeOption.PEOPLE)
+        self._results_mid_button.setEnabled(self._range_option == SearchDataView._SearchRangeOption.PEOPLE)
+        self._results_right_buton.setEnabled(self._range_option == SearchDataView._SearchRangeOption.THESES)
